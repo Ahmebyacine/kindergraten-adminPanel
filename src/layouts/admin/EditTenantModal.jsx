@@ -88,7 +88,10 @@ export function EditTenantModal({ tenant, onSave }) {
         </DialogHeader>
 
         <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+          <form
+            onSubmit={form.handleSubmit(onSubmit)}
+            className="space-y-6 max-h-[65vh] overflow-y-auto"
+          >
             {/* Grid layout for inputs */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               {/* Name */}
@@ -226,22 +229,21 @@ export function EditTenantModal({ tenant, onSave }) {
                 ))}
               </div>
             </div>
-
-            {/* Actions */}
-            <DialogFooter>
-              <Button
-                type="button"
-                variant="ghost"
-                onClick={() => setOpen(false)}
-              >
-                Cancel
-              </Button>
-              <Button disabled={!form.formState.isDirty} type="submit">
-                Save Changes
-              </Button>
-            </DialogFooter>
           </form>
         </Form>
+
+        {/* Actions */}
+        <DialogFooter>
+          <Button type="button" variant="ghost" onClick={() => setOpen(false)}>
+            Cancel
+          </Button>
+          <Button
+            disabled={!form.formState.isDirty}
+            onClick={form.handleSubmit(onSubmit)}
+          >
+            Save Changes
+          </Button>
+        </DialogFooter>
       </DialogContent>
     </Dialog>
   );
