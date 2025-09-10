@@ -61,6 +61,7 @@ export default function Tenants() {
       toast.success("Tenant updated successfully");
     } catch (error) {
       toast.error(error.response?.data?.message || "Failed to update tenant");
+      console.error(error);
     }
   };
   const handleChangePlanTenant = async (tenantData) => {
