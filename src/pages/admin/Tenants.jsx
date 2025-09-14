@@ -89,7 +89,7 @@ export default function Tenants() {
   return (
     <>
       <div className="mb-8">
-        <div className="flex justify-between items-center ">
+        <div className="flex justify-between items-center">
           <h1 className="text-3xl font-bold">Tenant Management</h1>
           <AddTenantModal plans={plans} onAdd={handleCreateTenant} />
         </div>
@@ -98,7 +98,7 @@ export default function Tenants() {
         </p>
       </div>
 
-      <Card>
+      <Card className="max-w-267">
         <CardHeader>
           <CardTitle>Subscription Management</CardTitle>
           <CardDescription>
@@ -106,111 +106,112 @@ export default function Tenants() {
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <div className="overflow-x-auto">
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>User Info</TableHead>
-                  <TableHead>Contact</TableHead>
-                  <TableHead>Status</TableHead>
-                  <TableHead>Plan</TableHead>
-                  <TableHead>Price</TableHead>
-                  <TableHead>Subscription Period</TableHead>
-                  <TableHead>Limits</TableHead>
-                  <TableHead className="text-right">Actions</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {loading ? (
-                  <LoadingRow />
-                ) : (
-                  tenants.map((tenant) => (
-                    <TableRow key={tenant._id} className={ tenant.status === "trial" ?
-                      "bg-chart-2/15" :
-                      isSoonExpired(tenant.endSubscription) ? "bg-destructive/15" :"bg-primary/15"} >
-                      <TableCell>
-                        <div className="space-y-1">
-                          <div className="font-medium">{tenant.name}</div>
-                          <div className="text-sm text-muted-foreground">
-                            @{tenant.username}
-                          </div>
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>User Info</TableHead>
+                <TableHead>Contact</TableHead>
+                <TableHead>Status</TableHead>
+                <TableHead>Plan</TableHead>
+                <TableHead>Price</TableHead>
+                <TableHead>Subscription Period</TableHead>
+                <TableHead>Limits</TableHead>
+                <TableHead>Actions</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {loading ? (
+                <LoadingRow />
+              ) : (
+                tenants.map((tenant) => (
+                  <TableRow
+                    key={tenant._id}
+                    className={
+                      tenant.status === "trial"
+                        ? "bg-chart-2/15"
+                        : isSoonExpired(tenant.endSubscription)
+                        ? "bg-destructive/15"
+                        : "bg-primary/15"
+                    }
+                  >
+                    <TableCell>
+                      <div className="space-y-1">
+                        <div className="font-medium">{tenant.name}</div>
+                        <div className="text-sm text-muted-foreground">
+                          @{tenant.username}
                         </div>
-                      </TableCell>
-                      <TableCell>
-                        <div className="space-y-1">
-                          <div className="text-sm">{tenant.email}</div>
-                          <div className="text-sm text-muted-foreground">
-                            {tenant.phone}
-                          </div>
+                      </div>
+                    </TableCell>
+                    <TableCell>
+                      <div className="space-y-1">
+                        <div className="text-sm">{tenant.email}</div>
+                        <div className="text-sm text-muted-foreground">
+                          {tenant.phone}
                         </div>
-                      </TableCell>
-                      <TableCell>{getStatusBadge(tenant.status)}</TableCell>
-                      <TableCell>{tenant.plan?.name}</TableCell>
-                      <TableCell>{formatCurrencyDZD(tenant?.amount)}</TableCell>
-                      <TableCell>
-                        <div className="space-y-1">
-                          <div className="text-sm">
-                            <span className="text-muted-foreground">
-                              Start:
-                            </span>{" "}
-                            {formatDate(tenant.startSubscription)}
-                          </div>
-                          <div className="text-sm">
-                            <span className="text-muted-foreground">End:</span>{" "}
-                            {formatDate(tenant.endSubscription)}
-                          </div>
+                      </div>
+                    </TableCell>
+                    <TableCell>{getStatusBadge(tenant.status)}</TableCell>
+                    <TableCell>{tenant.plan?.name}</TableCell>
+                    <TableCell>{formatCurrencyDZD(tenant?.amount)}</TableCell>
+                    <TableCell>
+                      <div className="space-y-1">
+                        <div className="text-sm">
+                          <span className="text-muted-foreground">Start:</span>{" "}
+                          {formatDate(tenant.startSubscription)}
                         </div>
-                      </TableCell>
-                      <TableCell className="min-w-40">
-                        <div className="grid grid-cols-2 gap-1 text-xs">
-                          <div>
-                            <span className="text-muted-foreground">
-                              Students:
-                            </span>{" "}
-                            {tenant.limits.students}
-                          </div>
-                          <div>
-                            <span className="text-muted-foreground">
-                              Users:
-                            </span>{" "}
-                            {tenant.limits.users}
-                          </div>
-                          <div>
-                            <span className="text-muted-foreground">
-                              Classes:
-                            </span>{" "}
-                            {tenant.limits.classes}
-                          </div>
-                          <div>
-                            <span className="text-muted-foreground">
-                              Categories:
-                            </span>{" "}
-                            {tenant.limits.categories}
-                          </div>
+                        <div className="text-sm">
+                          <span className="text-muted-foreground">End:</span>{" "}
+                          {formatDate(tenant.endSubscription)}
                         </div>
-                      </TableCell>
-                      <TableCell className="text-right">
-                        <EditTenantModal
-                          tenant={tenant}
-                          onSave={handleUpdateTenant}
-                        />
-                        <ChangePlanTenantModal
-                          tenant={tenant}
-                          plans={plans}
-                          onSave={handleChangePlanTenant}
-                        />
-                        <DeleteAlertDialog
-                          trigger={<Trash2 />}
-                          item={tenant._id}
-                          onDelete={handleDeleteTenant}
-                        />
-                      </TableCell>
-                    </TableRow>
-                  ))
-                )}
-              </TableBody>
-            </Table>
-          </div>
+                      </div>
+                    </TableCell>
+                    <TableCell className="min-w-40">
+                      <div className="grid grid-cols-2 gap-1 text-xs">
+                        <div>
+                          <span className="text-muted-foreground">
+                            Students:
+                          </span>{" "}
+                          {tenant.limits.students}
+                        </div>
+                        <div>
+                          <span className="text-muted-foreground">Users:</span>{" "}
+                          {tenant.limits.users}
+                        </div>
+                        <div>
+                          <span className="text-muted-foreground">
+                            Classes:
+                          </span>{" "}
+                          {tenant.limits.classes}
+                        </div>
+                        <div>
+                          <span className="text-muted-foreground">
+                            Categories:
+                          </span>{" "}
+                          {tenant.limits.categories}
+                        </div>
+                      </div>
+                    </TableCell>
+                    <TableCell>
+                      <EditTenantModal
+                        tenant={tenant}
+                        onSave={handleUpdateTenant}
+                      />
+                      <ChangePlanTenantModal
+                        tenant={tenant}
+                        plans={plans}
+                        onSave={handleChangePlanTenant}
+                      />
+                      <DeleteAlertDialog
+                        trigger={<Trash2 />}
+                        item={tenant._id}
+                        onDelete={handleDeleteTenant}
+                      />
+                    </TableCell>
+                  </TableRow>
+                ))
+              )}
+            </TableBody>
+          </Table>
         </CardContent>
       </Card>
     </>

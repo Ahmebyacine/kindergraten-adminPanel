@@ -149,7 +149,7 @@ export function ChangePlanTenantModal({tenant, plans=[] , onSave }) {
                 Cancel
               </Button>
               <Button type="submit">
-                Create Tenant
+                Save
               </Button>
             </DialogFooter>
           </form>
