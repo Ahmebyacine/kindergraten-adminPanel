@@ -38,6 +38,16 @@ export const changePlanTenant = async (id, tenantData) => {
   return response.data;
 };
 
+export const resendTenantMail = async (email) => {
+  const response = await api.post(`/api/v1/tenants/resend-login-info`, { email });
+  return response.data;
+};
+
+export const updateTenantEmail = async (data) => {
+  const response = await api.post(`/api/v1/tenants/update-email`, data);
+  return response.data;
+};
+
 // Delete a tenant
 export const deleteTenant = async (id) => {
   await api.delete(`/api/v1/tenants/${id}`);

@@ -5,6 +5,7 @@ import {
 } from "@/components/ui/sidebar";
 import { NavLink, useLocation } from "react-router-dom";
 import { Buliding, Cards, Category, Setting2 } from "iconsax-react";
+import { Mail } from "lucide-react";
 
 export default function SidebarMenuAdmin() {
   const location = useLocation();
@@ -24,6 +25,16 @@ export default function SidebarMenuAdmin() {
       url: "/plans",
       icon: Cards,
     },
+    {
+      title: "Resend Login Info",
+      url: "/resend-login-info",
+      icon: Setting2,
+    },
+    {
+      title: "Update Tenant Email",
+      url: "/update-tenant-email",
+      icon: Mail,
+    }
     //{
     //  title: "Settings",
     //  url: "/settings",

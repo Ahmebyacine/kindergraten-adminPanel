@@ -6,6 +6,8 @@ import Dashboard from "./pages/admin/Dashboard";
 import Plans from "./pages/admin/Plans";
 import Layout from "./layouts/layout";
 import Tenants from "./pages/admin/Tenants";
+import ResendLoginInfoPage from "./pages/admin/ResendLoginInfoPage";
+import UpdateTenantEmailPage from "./pages/admin/UpdateTenantEmailPage";
 
 const router = createHashRouter([
   {
@@ -30,6 +32,8 @@ const router = createHashRouter([
                 path: "tenants",
                 element: <Tenants />,
               },
+              { path: "resend-login-info", element: <ResendLoginInfoPage /> },
+              { path: "update-tenant-email", element: <UpdateTenantEmailPage /> },
             ],
           },
         ],

@@ -18,9 +18,8 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "./ui/dropdown-menu";
-import { More, ProfileCircle, Setting2 } from "iconsax-react";
+import { More } from "iconsax-react";
 import img from "@/assets/images/avatar.png";
-import { Button } from "./ui/button";
 import logoLt from "@/assets/images/logoSidebarLatino.png";
 import { useAuth } from "@/hooks/useAuth";
 
