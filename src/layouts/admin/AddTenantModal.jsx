@@ -35,7 +35,7 @@ const formSchema = z.object({
   username: z.string().min(3, "Username must be at least 3 characters").max(50),
   email: z.string().email("Please enter a valid email address"),
   name: z.string().min(2, "Name must be at least 2 characters").max(100),
-  phone: z.string().min(14, "Please enter a valid phone number"),
+  phone: z.string().min(10, "Please enter a valid phone number"),
   plan: z.string().optional(),
   status: z.enum(["active", "trial", "suspended"]).default("active"),
 });
