@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { fetchPlans } from "@/api/planApi";
 import {
   changePlanTenant,
@@ -33,19 +34,52 @@ import { formatCurrencyDZD } from "@/utils/currencyFormatter";
 import LoadingRow from "@/components/LoadingRow";
 import { Trash2 } from "lucide-react";
 import { isSoonExpired } from "@/utils/isSoonExpired";
+import { Input } from "@/components/ui/input";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Button } from "@/components/ui/button";
 
 export default function Tenants() {
+  const [filters, setFilters] = useState({
+    status: "all",
+    startDate: "",
+    endDate: "",
+    page: 1,
+    limit: 10,
+  });
+
   const {
-    data: tenants,
-    setData: setTenants,
+    data: tenantsResponse,
     loading,
-  } = useFetch(fetchTenants);
+    refetch,
+  } = useFetch(() => fetchTenants(filters));
+
+  const tenants = tenantsResponse?.data || [];
+  const pagination = tenantsResponse?.pagination || {};
+
   const { data: plans } = useFetch(fetchPlans);
+
+  const handleFilterChange = (key, value) => {
+    const newFilters = { ...filters, [key]: value, page: 1 };
+    setFilters(newFilters);
+    refetch(() => fetchTenants(newFilters));
+  };
+
+  const handlePageChange = (newPage) => {
+    const newFilters = { ...filters, page: newPage };
+    setFilters(newFilters);
+    refetch(() => fetchTenants(newFilters));
+  };
 
   const handleCreateTenant = async (tenantData) => {
     try {
-      const newTenant = await createTenant(tenantData);
-      setTenants((prev) => [newTenant, ...prev]);
+      await createTenant(tenantData);
+      refetch(() => fetchTenants(filters));
       toast.success("Tenant added successfully!");
     } catch (error) {
       toast.error(error.response?.data?.message || "Failed to add tenant");
@@ -54,22 +88,18 @@ export default function Tenants() {
 
   const handleUpdateTenant = async (tenantData) => {
     try {
-      const updated = await updateTenant(tenantData._id, tenantData);
-      setTenants((prev) =>
-        prev.map((tenant) => (tenant._id === updated._id ? updated : tenant))
-      );
+      await updateTenant(tenantData._id, tenantData);
+      refetch(() => fetchTenants(filters));
       toast.success("Tenant updated successfully");
     } catch (error) {
       toast.error(error.response?.data?.message || "Failed to update tenant");
-      console.error(error);
     }
   };
+
   const handleChangePlanTenant = async (tenantData) => {
     try {
-      const updated = await changePlanTenant(tenantData._id, tenantData);
-      setTenants((prev) =>
-        prev.map((tenant) => (tenant._id === updated._id ? updated : tenant))
-      );
+      await changePlanTenant(tenantData._id, tenantData);
+      refetch(() => fetchTenants(filters));
       toast.success("Tenant updated successfully");
     } catch (error) {
       toast.error(error.response?.data?.message || "Failed to update tenant");
@@ -79,7 +109,7 @@ export default function Tenants() {
   const handleDeleteTenant = async (id) => {
     try {
       await deleteTenant(id);
-      setTenants((prev) => prev.filter((tenant) => tenant._id !== id));
+      refetch(() => fetchTenants(filters));
       toast.success("Tenant deleted successfully");
     } catch (error) {
       toast.error(error.response?.data?.message || "Failed to delete tenant");
@@ -98,13 +128,68 @@ export default function Tenants() {
         </p>
       </div>
 
-      <Card className="max-w-267">
+      {/* Filters */}
+      <div className="mb-4 grid grid-cols-4 gap-3">
+        <Select
+          value={filters.status}
+          onValueChange={(v) => handleFilterChange("status", v)}
+        >
+          <SelectTrigger>
+            <SelectValue placeholder="Status" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">All</SelectItem>
+            <SelectItem value="active">Active</SelectItem>
+            <SelectItem value="trial">Trial</SelectItem>
+            <SelectItem value="suspended">Suspended</SelectItem>
+          </SelectContent>
+        </Select>
+
+        <Input
+          type="date"
+          value={filters.startDate}
+          onChange={(e) => handleFilterChange("startDate", e.target.value)}
+        />
+
+        <Input
+          type="date"
+          value={filters.endDate}
+          onChange={(e) => handleFilterChange("endDate", e.target.value)}
+        />
+
+        <Button
+          variant="outline"
+          onClick={() => {
+            setFilters({
+              status: "all",
+              startDate: "",
+              endDate: "",
+              page: 1,
+              limit: 10,
+            });
+            refetch(() =>
+              fetchTenants({
+                status: "all",
+                startDate: "",
+                endDate: "",
+                page: 1,
+                limit: 10,
+              })
+            );
+          }}
+        >
+          Reset Filters
+        </Button>
+      </div>
+
+      <Card>
         <CardHeader>
           <CardTitle>Subscription Management</CardTitle>
           <CardDescription>
             Manage user subscriptions, limits, and account status
           </CardDescription>
         </CardHeader>
+
         <CardContent>
           <Table>
             <TableHeader>
@@ -119,9 +204,19 @@ export default function Tenants() {
                 <TableHead>Actions</TableHead>
               </TableRow>
             </TableHeader>
+
             <TableBody>
               {loading ? (
                 <LoadingRow />
+              ) : tenants.length === 0 ? (
+                <TableRow>
+                  <TableCell
+                    colSpan={8}
+                    className="h-32 text-center text-muted-foreground"
+                  >
+                    No tenants found.
+                  </TableCell>
+                </TableRow>
               ) : (
                 tenants.map((tenant) => (
                   <TableRow
@@ -142,6 +237,7 @@ export default function Tenants() {
                         </div>
                       </div>
                     </TableCell>
+
                     <TableCell>
                       <div className="space-y-1">
                         <div className="text-sm">{tenant.email}</div>
@@ -150,9 +246,11 @@ export default function Tenants() {
                         </div>
                       </div>
                     </TableCell>
+
                     <TableCell>{getStatusBadge(tenant.status)}</TableCell>
                     <TableCell>{tenant.plan?.name}</TableCell>
                     <TableCell>{formatCurrencyDZD(tenant?.amount)}</TableCell>
+
                     <TableCell>
                       <div className="space-y-1">
                         <div className="text-sm">
@@ -165,32 +263,16 @@ export default function Tenants() {
                         </div>
                       </div>
                     </TableCell>
+
                     <TableCell className="min-w-40">
                       <div className="grid grid-cols-2 gap-1 text-xs">
-                        <div>
-                          <span className="text-muted-foreground">
-                            Students:
-                          </span>{" "}
-                          {tenant.limits.students}
-                        </div>
-                        <div>
-                          <span className="text-muted-foreground">Users:</span>{" "}
-                          {tenant.limits.users}
-                        </div>
-                        <div>
-                          <span className="text-muted-foreground">
-                            Classes:
-                          </span>{" "}
-                          {tenant.limits.classes}
-                        </div>
-                        <div>
-                          <span className="text-muted-foreground">
-                            Categories:
-                          </span>{" "}
-                          {tenant.limits.categories}
-                        </div>
+                        <div>Students: {tenant.limits.students}</div>
+                        <div>Users: {tenant.limits.users}</div>
+                        <div>Classes: {tenant.limits.classes}</div>
+                        <div>Categories: {tenant.limits.categories}</div>
                       </div>
                     </TableCell>
+
                     <TableCell>
                       <EditTenantModal
                         tenant={tenant}
@@ -214,6 +296,27 @@ export default function Tenants() {
           </Table>
         </CardContent>
       </Card>
+
+      {/* Pagination */}
+      <div className="flex justify-between items-center mt-6">
+        <Button
+          disabled={filters.page === 1}
+          onClick={() => handlePageChange(filters.page - 1)}
+        >
+          Previous
+        </Button>
+
+        <div>
+          Page {pagination.page} of {pagination.totalPages || 1}
+        </div>
+
+        <Button
+          disabled={filters.page >= (pagination.totalPages || 1)}
+          onClick={() => handlePageChange(filters.page + 1)}
+        >
+          Next
+        </Button>
+      </div>
     </>
   );
 }

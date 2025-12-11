@@ -1,8 +1,8 @@
 import api from "@/api";
 
 // Fetch tenants
-export const fetchTenants = async () => {
-  const response = await api.get("/api/v1/tenants");
+export const fetchTenants = async (params = {}) => {
+  const response = await api.get("/api/v1/tenants", { params });
   return response.data;
 };
 
@@ -52,3 +52,10 @@ export const updateTenantEmail = async (data) => {
 export const deleteTenant = async (id) => {
   await api.delete(`/api/v1/tenants/${id}`);
 };
+
+export async function checkUsernameUnique(username) {
+  const res = await api.get(`/api/v1/tenants/check-username`, {
+    params: { username }
+  });
+  return res.data.valid;
+}

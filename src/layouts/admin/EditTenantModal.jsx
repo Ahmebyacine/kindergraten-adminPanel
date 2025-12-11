@@ -35,7 +35,6 @@ import { Edit } from "lucide-react";
 // Zod schema for validation
 const tenantSchema = z.object({
   name: z.string().min(2, "Name is required"),
-  email: z.string().email("Invalid email"),
   phone: z.string().optional(),
   status: z.enum(["active", "trial", "suspended"], {
     errorMap: () => ({ message: "Select a status" }),
@@ -114,21 +113,10 @@ export function EditTenantModal({ tenant, onSave }) {
                 <Label>Username</Label>
                 <Input value={tenant.username} disabled className="bg-muted" />
               </div>
-
-              {/* Email */}
-              <FormField
-                control={form.control}
-                name="email"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Email</FormLabel>
-                    <FormControl>
-                      <Input type="email" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
+              <div>
+                <Label>Email</Label>
+                <Input type="email" value={tenant.email} disabled className="bg-muted" />
+              </div>
 
               {/* Phone */}
               <FormField

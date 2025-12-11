@@ -48,7 +48,7 @@ export function ChangePlanTenantModal({tenant, plans=[] , onSave }) {
   });
 
   const onSubmit = async (data) => {
-    await onSave?.({...data, ...tenant});
+    await onSave?.({...tenant, ...data});
     form.reset();
     setOpen(false);
   };

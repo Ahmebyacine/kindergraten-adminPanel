@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -30,9 +30,18 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { Plus } from "lucide-react";
+import { checkUsernameUnique } from "@/api/tenantApi";
 
 const formSchema = z.object({
-  username: z.string().min(3, "Username must be at least 3 characters").max(50),
+  username: z
+    .string()
+    .min(3, "Username must be at least 3 characters")
+    .max(50)
+    .refine(async (value) => {
+      if (!value) return false;
+      const isUnique = await checkUsernameUnique(value);
+      return isUnique;
+    }, "This username is already taken"),
   email: z.string().email("Please enter a valid email address"),
   name: z.string().min(2, "Name must be at least 2 characters").max(100),
   phone: z.string().min(10, "Please enter a valid phone number"),
@@ -54,6 +63,24 @@ export function AddTenantModal({ plans = [], onAdd }) {
       status: "active",
     },
   });
+
+  useEffect(() => {
+    const handleShortcut = (e) => {
+      // Ignore when typing
+      const tag = e.target.tagName.toLowerCase();
+      if (tag === "input" || tag === "textarea" || e.target.isContentEditable) {
+        return;
+      }
+
+      if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "o") {
+        e.preventDefault();
+        setOpen(true);
+      }
+    };
+
+    window.addEventListener("keydown", handleShortcut);
+    return () => window.removeEventListener("keydown", handleShortcut);
+  }, []);
 
   const onSubmit = async (data) => {
     await onAdd?.(data);
@@ -88,9 +115,16 @@ export function AddTenantModal({ plans = [], onAdd }) {
                   <FormItem>
                     <FormLabel>Username *</FormLabel>
                     <FormControl>
-                      <Input placeholder="kindergarten-name" {...field} />
+                      <Input
+                        placeholder="kindergarten-username"
+                        {...field}
+                        onChange={(e) =>
+                          field.onChange(e.target.value.toLowerCase())
+                        }
+                      />
                     </FormControl>
                     <FormDescription>
+                      {form.formState.isValidating && "Checking availability…"}
                       This will be used for the subdomain: username.rawdatee.com
                     </FormDescription>
                     <FormMessage />
@@ -214,7 +248,7 @@ export function AddTenantModal({ plans = [], onAdd }) {
               >
                 Cancel
               </Button>
-              <Button type="submit">
+              <Button type="submit" disabled={form.formState.isSubmitting}>
                 Create Tenant
               </Button>
             </DialogFooter>
